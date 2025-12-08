@@ -8,9 +8,14 @@ export const addBlog = async (req, res)=>{
     const imageFile = req.file;
 
     //Check if all fields are present
-    if(!title || !description || !category || !imageFile){
-      return res.json({succes: false, message: "Please fill all required fields"});
-    }
+    // Validate mandatory fields
+if (!title || !description || !category || !imageFile) {
+  return res.status(400).json({
+    success: false,
+    message: "Please fill all required fields"
+  });
+}
+
     const fileBuffer = fs.readFileSync(imageFile.path)
     //Upload image to imagekit
     const response = await imagekit.upload({
@@ -31,7 +36,11 @@ export const addBlog = async (req, res)=>{
 
     await Blog.create({title, subTitle, description, category, image, isPublished})
 
-    res.json({success: true, message: "Blog added successfully"});
+    return res.status(201).json({
+  success: true,
+  message: "Blog added successfully",
+  image
+});
 
   } catch (error) {
     res.json({success: false, message: error.message});
