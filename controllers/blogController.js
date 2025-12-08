@@ -43,7 +43,12 @@ if (!title || !description || !category || !imageFile) {
 });
 
   } catch (error) {
-    res.json({success: false, message: error.message});
+    console.error("Add Blog Error:", error);
+return res.status(500).json({
+  success: false,
+  message: "Server error while uploading blog"
+});
+
 
   }
 }
