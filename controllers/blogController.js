@@ -15,6 +15,21 @@ export const getAllBlogs = async (req, res) => {
     return res.status(500).json({ success: false, message: "Cannot fetch blogs" });
   }
 };
+export const getBlogById = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    return res.status(200).json({ success: true, blog });
+  } catch (error) {
+    console.error("Get Blog By ID Error:", error);
+    return res.status(500).json({ success: false, message: "Invalid blog ID" });
+  }
+};
 
 
 export const addBlog = async (req, res)=>{
