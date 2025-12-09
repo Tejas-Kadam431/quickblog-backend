@@ -4,9 +4,21 @@ import Blog from '../models/Blog.js';
 
 export const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 }); // newest first
+    const page = parseInt(req.query.page) || 1; // current page
+    const limit = parseInt(req.query.limit) || 10; // blogs per page
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalBlogs = await Blog.countDocuments();
+
     return res.status(200).json({
       success: true,
+      page,
+      totalPages: Math.ceil(totalBlogs / limit),
       count: blogs.length,
       blogs
     });
@@ -15,6 +27,7 @@ export const getAllBlogs = async (req, res) => {
     return res.status(500).json({ success: false, message: "Cannot fetch blogs" });
   }
 };
+
 export const getBlogById = async (req, res) => {
   try {
     const blogId = req.params.id;
