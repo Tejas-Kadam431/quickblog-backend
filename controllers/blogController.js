@@ -2,6 +2,21 @@ import fs from 'fs';
 import imagekit from '../configs/imageKit.js';
 import Blog from '../models/Blog.js';
 
+export const getAllBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find().sort({ createdAt: -1 }); // newest first
+    return res.status(200).json({
+      success: true,
+      count: blogs.length,
+      blogs
+    });
+  } catch (error) {
+    console.error("Get All Blogs Error:", error);
+    return res.status(500).json({ success: false, message: "Cannot fetch blogs" });
+  }
+};
+
+
 export const addBlog = async (req, res)=>{
   try {
     const {title, subTitle, description, category, isPublished} = JSON.parse(req.body.blog);
