@@ -8,12 +8,16 @@ export const getAllBlogs = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10; // blogs per page
     const skip = (page - 1) * limit;
 
-    const blogs = await Blog.find()
+    const filter = req.query.category ? { category: req.query.category } : {};
+
+    const blogs = await Blog.find(filter)
+
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalBlogs = await Blog.countDocuments();
+    const totalBlogs = await Blog.countDocuments(filter);
+
 
     return res.status(200).json({
       success: true,
