@@ -5,12 +5,16 @@ import auth from '../middleware/auth.js';
 import { addBlog, getAllBlogs } from "../controllers/blogController.js";
 import { addBlog, getAllBlogs, getBlogById } from "../controllers/blogController.js";
 import { addBlog, getAllBlogs, getBlogById, deleteBlog } from "../controllers/blogController.js";
+import { addBlog, getAllBlogs, getBlogById, deleteBlog, togglePublishBlog } 
+from "../controllers/blogController.js";
 
 
 
 blogRouter.get("/all", getAllBlogs); // ⭐ New route
 blogRouter.get("/:id", getBlogById);
 blogRouter.delete("/:id", auth, deleteBlog);
+blogRouter.patch("/publish/:id", auth, togglePublishBlog);
+
 
 
 

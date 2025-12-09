@@ -68,6 +68,32 @@ export const deleteBlog = async (req, res) => {
     });
   }
 };
+export const togglePublishBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    blog.isPublished = !blog.isPublished;
+    await blog.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Blog is now ${blog.isPublished ? "Published" : "Unpublished"}`,
+      isPublished: blog.isPublished
+    });
+  } catch (error) {
+    console.error("Toggle Publish Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update publish status"
+    });
+  }
+};
+
 
 
 
