@@ -93,6 +93,37 @@ export const togglePublishBlog = async (req, res) => {
     });
   }
 };
+export const updateBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const { title, subTitle, description, category, isPublished } = req.body;
+
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    // Update only if provided
+    if (title) blog.title = title;
+    if (subTitle !== undefined) blog.subTitle = subTitle;
+    if (description) blog.description = description;
+    if (category) blog.category = category;
+    if (isPublished !== undefined) blog.isPublished = isPublished;
+
+    await blog.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog updated successfully",
+      blog
+    });
+  } catch (error) {
+    console.error("Update Blog Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update blog" });
+  }
+};
+
 
 
 
