@@ -2,7 +2,8 @@ import express from 'express';
 import { addBlog } from '../controllers/blogController.js';
 import upload from '../middleware/multer.js';
 import auth from '../middleware/auth.js';
-import { addBlog, getAllBlogs, getBlogById, deleteBlog, togglePublishBlog, updateBlog } from "../controllers/blogController.js";
+import { addBlog, getAllBlogs, getBlogById, deleteBlog, togglePublishBlog, updateBlog, getUnpublishedBlogs } from "../controllers/blogController.js";
+
 
 
 
@@ -13,6 +14,8 @@ blogRouter.put("/:id", auth, upload.single("image"), updateBlog);
 
 blogRouter.delete("/:id", auth, deleteBlog);
 blogRouter.patch("/publish/:id", auth, togglePublishBlog);
+blogRouter.get("/unpublished/all", auth, getUnpublishedBlogs);
+
 
 
 

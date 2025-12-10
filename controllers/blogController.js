@@ -93,7 +93,22 @@ export const togglePublishBlog = async (req, res) => {
     });
   }
 };
-import fs from "fs";
+export const getUnpublishedBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find({ isPublished: false }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: blogs.length,
+      blogs
+    });
+  } catch (error) {
+    console.error("Get Unpublished Blogs Error:", error);
+    return res.status(500).json({ success: false, message: "Cannot fetch unpublished blogs" });
+  }
+};
+
+
 
 export const updateBlog = async (req, res) => {
   try {
