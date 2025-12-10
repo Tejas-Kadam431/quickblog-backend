@@ -93,36 +93,66 @@ export const togglePublishBlog = async (req, res) => {
     });
   }
 };
+import fs from "fs";
+
 export const updateBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
     const { title, subTitle, description, category, isPublished } = req.body;
+    const imageFile = req.file;
 
     const blog = await Blog.findById(blogId);
-
     if (!blog) {
       return res.status(404).json({ success: false, message: "Blog not found" });
     }
 
-    // Update only if provided
+    // Update fields if provided
     if (title) blog.title = title;
     if (subTitle !== undefined) blog.subTitle = subTitle;
     if (description) blog.description = description;
     if (category) blog.category = category;
     if (isPublished !== undefined) blog.isPublished = isPublished;
 
+    // If new image uploaded → upload & replace old one
+    if (imageFile) {
+      const fileBuffer = fs.readFileSync(imageFile.path);
+
+      // Upload new image
+      const uploadResponse = await imagekit.upload({
+        file: fileBuffer,
+        fileName: imageFile.originalname,
+        folder: "/blogs",
+      });
+
+      const optimizedImageUrl = imagekit.url({
+        src: uploadResponse.url,
+        transformation: [
+          { quality: "auto" },
+          { format: "webp" },
+          { width: "1280" },
+        ],
+      });
+
+      // Delete local temp file
+      fs.unlinkSync(imageFile.path);
+
+      // Replace blog image
+      blog.image = optimizedImageUrl;
+    }
+
     await blog.save();
 
     return res.status(200).json({
       success: true,
       message: "Blog updated successfully",
-      blog
+      blog,
     });
   } catch (error) {
     console.error("Update Blog Error:", error);
     return res.status(500).json({ success: false, message: "Failed to update blog" });
   }
 };
+
 
 
 

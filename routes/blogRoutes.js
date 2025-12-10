@@ -8,7 +8,8 @@ import { addBlog, getAllBlogs, getBlogById, deleteBlog, togglePublishBlog, updat
 
 blogRouter.get("/all", getAllBlogs); // ⭐ New route
 blogRouter.get("/:id", getBlogById);
-blogRouter.put("/:id", auth, updateBlog);
+blogRouter.put("/:id", auth, upload.single("image"), updateBlog);
+
 
 blogRouter.delete("/:id", auth, deleteBlog);
 blogRouter.patch("/publish/:id", auth, togglePublishBlog);
