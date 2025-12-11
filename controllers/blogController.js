@@ -223,3 +223,33 @@ return res.status(500).json({
 
   }
 }
+
+export const searchBlogs = async (req, res) => {
+  try {
+    const query = req.query.q;
+
+    if (!query) {
+      return res.status(400).json({ success: false, message: "Search query is required" });
+    }
+
+    const regex = new RegExp(query, "i"); // case-insensitive search
+
+    const blogs = await Blog.find({
+      $or: [
+        { title: regex },
+        { description: regex },
+        { category: regex }
+      ],
+      isPublished: true
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: blogs.length,
+      blogs
+    });
+  } catch (error) {
+    console.error("Search Blogs Error:", error);
+    return res.status(500).json({ success: false, message: "Search failed" });
+  }
+};

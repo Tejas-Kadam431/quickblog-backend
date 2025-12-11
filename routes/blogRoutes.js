@@ -2,12 +2,23 @@ import express from 'express';
 import { addBlog } from '../controllers/blogController.js';
 import upload from '../middleware/multer.js';
 import auth from '../middleware/auth.js';
-import { addBlog, getAllBlogs, getBlogById, deleteBlog, togglePublishBlog, updateBlog, getUnpublishedBlogs } from "../controllers/blogController.js";
+import {
+  addBlog,
+  getAllBlogs,
+  getBlogById,
+  deleteBlog,
+  togglePublishBlog,
+  updateBlog,
+  getUnpublishedBlogs,
+  searchBlogs
+} from "../controllers/blogController.js";
 
 
 
 
 blogRouter.get("/all", getAllBlogs); // ⭐ New route
+blogRouter.get("/search", searchBlogs);
+
 blogRouter.get("/:id", getBlogById);
 blogRouter.put("/:id", auth, upload.single("image"), updateBlog);
 
