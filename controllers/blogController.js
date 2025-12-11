@@ -129,31 +129,43 @@ export const updateBlog = async (req, res) => {
     if (isPublished !== undefined) blog.isPublished = isPublished;
 
     // If new image uploaded → upload & replace old one
-    if (imageFile) {
-      const fileBuffer = fs.readFileSync(imageFile.path);
+if (imageFile) {
+  // Step 1: Extract old image fileId from ImageKit
+  try {
+    const oldFileInfo = await imagekit.getFileDetails(blog.image);
+    const oldFileId = oldFileInfo.fileId;
 
-      // Upload new image
-      const uploadResponse = await imagekit.upload({
-        file: fileBuffer,
-        fileName: imageFile.originalname,
-        folder: "/blogs",
-      });
+    // Step 2: Delete old image from ImageKit
+    await imagekit.deleteFile(oldFileId);
+  } catch (error) {
+    console.error("Failed to delete old image:", error.message);
+  }
 
-      const optimizedImageUrl = imagekit.url({
-        src: uploadResponse.url,
-        transformation: [
-          { quality: "auto" },
-          { format: "webp" },
-          { width: "1280" },
-        ],
-      });
+  // Step 3: Upload new image
+  const fileBuffer = fs.readFileSync(imageFile.path);
 
-      // Delete local temp file
-      fs.unlinkSync(imageFile.path);
+  const uploadResponse = await imagekit.upload({
+    file: fileBuffer,
+    fileName: imageFile.originalname,
+    folder: "/blogs",
+  });
 
-      // Replace blog image
-      blog.image = optimizedImageUrl;
-    }
+  const optimizedImageUrl = imagekit.url({
+    src: uploadResponse.url,
+    transformation: [
+      { quality: "auto" },
+      { format: "webp" },
+      { width: "1280" },
+    ],
+  });
+
+  // Step 4: Delete local temp file
+  fs.unlinkSync(imageFile.path);
+
+  // Step 5: Save new image URL
+  blog.image = optimizedImageUrl;
+}
+
 
     await blog.save();
 
