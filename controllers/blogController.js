@@ -2,6 +2,7 @@ import fs from 'fs';
 import imagekit from '../configs/imageKit.js';
 import Blog from '../models/Blog.js';
 
+
 export const getAllBlogs = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // current page
@@ -217,7 +218,21 @@ if (!title || !description || !category || !imageFile) {
     });
     const image = optimizedImageUrl;
 
-    await Blog.create({title, subTitle, description, category, image, isPublished})
+    const slug = title
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
+
+await Blog.create({
+  title,
+  subTitle,
+  description,
+  category,
+  image,
+  isPublished,
+  slug
+});
+
 
     return res.status(201).json({
   success: true,
@@ -283,4 +298,20 @@ export const getPublishedBlogs = async (req, res) => {
     });
   }
 };
+export const getBlogBySlug = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const blog = await Blog.findOne({ slug });
+
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    return res.status(200).json({ success: true, blog });
+  } catch (error) {
+    console.error("Get Blog By Slug Error:", error);
+    return res.status(500).json({ success: false, message: "Invalid slug" });
+  }
+};
+
 
