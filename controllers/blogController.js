@@ -186,70 +186,89 @@ if (imageFile) {
 
 
 
-export const addBlog = async (req, res)=>{
+export const addBlog = async (req, res) => {
   try {
-    const {title, subTitle, description, category, isPublished} = JSON.parse(req.body.blog);
+    const { title, subTitle, description, category, isPublished } = JSON.parse(req.body.blog);
     const imageFile = req.file;
 
-    //Check if all fields are present
-    // Validate mandatory fields
-if (!title || !description || !category || !imageFile) {
-  return res.status(400).json({
-    success: false,
-    message: "Please fill all required fields"
-  });
-}
+    // 1) Validate required fields
+    if (!title || !description || !category || !imageFile) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill all required fields",
+      });
+    }
 
-    const fileBuffer = fs.readFileSync(imageFile.path)
-    //Upload image to imagekit
+    // 2) Helper function INSIDE addBlog to generate a unique slug
+    const generateUniqueSlug = async (title) => {
+      // 2.1) Make a basic "base" slug from title
+      let slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")    // anything not a–z or 0–9 becomes "-"
+        .replace(/^-+|-+$/g, "");       // remove - at start or end
+
+      let finalSlug = slug;
+      let counter = 1;
+
+      // 2.2) While a blog already exists with this slug, add -1, -2, -3, ...
+      while (await Blog.findOne({ slug: finalSlug })) {
+        finalSlug = `${slug}-${counter}`;
+        counter++;
+      }
+
+      return finalSlug;
+    };
+
+    // 3) Upload image to ImageKit
+    const fileBuffer = fs.readFileSync(imageFile.path);
+
     const response = await imagekit.upload({
       file: fileBuffer,
       fileName: imageFile.originalname,
-      folder: "/blogs"
+      folder: "/blogs",
     });
-    // optimization through imagekit url transformation
-    const optimizedImageUrl = imagekit.baseURL({
-      path: response.filePath,
+
+    const optimizedImageUrl = imagekit.url({
+      src: response.url,
       transformation: [
-        {quality: 'auto'}, //Auto compression
-        {format: 'webp'}, //Convert to modern format
-        {width: '1280'} //widht resizing
-      ]
+        { quality: "auto" },
+        { format: "webp" },
+        { width: "1280" },
+      ],
     });
+
     const image = optimizedImageUrl;
 
-    const slug = title
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, "-")
-  .replace(/^-+|-+$/g, "");
+    // 4) Generate a UNIQUE slug using the helper
+    const slug = await generateUniqueSlug(title);
 
-await Blog.create({
-  title,
-  subTitle,
-  description,
-  category,
-  image,
-  isPublished,
-  slug
-});
-
+    // 5) Create the blog in DB
+    const newBlog = await Blog.create({
+      title,
+      subTitle,
+      description,
+      category,
+      image,
+      isPublished,
+      slug,
+    });
 
     return res.status(201).json({
-  success: true,
-  message: "Blog added successfully",
-  image
-});
-
+      success: true,
+      message: "Blog added successfully",
+      blog: newBlog,
+    });
   } catch (error) {
     console.error("Add Blog Error:", error);
-return res.status(500).json({
-  success: false,
-  message: "Server error while uploading blog"
-});
-
-
+    return res.status(500).json({
+      success: false,
+      message: "Server error while adding blog",
+    });
   }
-}
+};
+
+
+
 
 export const searchBlogs = async (req, res) => {
   try {
