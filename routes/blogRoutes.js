@@ -10,14 +10,17 @@ import {
   togglePublishBlog,
   updateBlog,
   getUnpublishedBlogs,
-  searchBlogs
+  searchBlogs,
+  getPublishedBlogs
 } from "../controllers/blogController.js";
+
 
 
 
 
 blogRouter.get("/all", getAllBlogs); // ⭐ New route
 blogRouter.get("/search", searchBlogs);
+blogRouter.get("/published/all", getPublishedBlogs);
 
 blogRouter.get("/:id", getBlogById);
 blogRouter.put("/:id", auth, upload.single("image"), updateBlog);

@@ -265,3 +265,22 @@ export const searchBlogs = async (req, res) => {
     return res.status(500).json({ success: false, message: "Search failed" });
   }
 };
+export const getPublishedBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find({ isPublished: true })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: blogs.length,
+      blogs
+    });
+  } catch (error) {
+    console.error("Get Published Blogs Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch published blogs"
+    });
+  }
+};
+
