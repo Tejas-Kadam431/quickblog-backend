@@ -148,20 +148,22 @@ export const getUnpublishedBlogs = async (req, res) => {
 /* ----------------------------------
    Get Blog by ID
 -----------------------------------*/
-export const getBlogById = async (req, res) => {
+export const getBlogById = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id);
 
     if (!blog) {
-      return errorResponse(res, 404, "Blog not found");
+      const error = new Error("Blog not found");
+      error.statusCode = 404;
+      throw error;
     }
 
     return successResponse(res, blog);
   } catch (error) {
-    console.error("Get Blog By ID Error:", error);
-    return errorResponse(res, 400, "Invalid blog ID");
+    next(error);
   }
 };
+
 
 /* ----------------------------------
    Get Blog by Slug
