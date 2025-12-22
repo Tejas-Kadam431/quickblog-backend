@@ -1,6 +1,8 @@
 import fs from 'fs';
 import imagekit from '../configs/imageKit.js';
 import Blog from '../models/Blog.js';
+import { successResponse, errorResponse } from "../utils/response.js";
+
 
 
 export const getAllBlogs = async (req, res) => {
@@ -20,16 +22,16 @@ export const getAllBlogs = async (req, res) => {
     const totalBlogs = await Blog.countDocuments(filter);
 
 
-    return res.status(200).json({
-      success: true,
-      page,
-      totalPages: Math.ceil(totalBlogs / limit),
-      count: blogs.length,
-      blogs
-    });
+    return successResponse(
+  res,
+  { page, totalPages, count: blogs.length, blogs },
+  "Blogs fetched successfully"
+);
+
   } catch (error) {
     console.error("Get All Blogs Error:", error);
-    return res.status(500).json({ success: false, message: "Cannot fetch blogs" });
+    return errorResponse(res, 500, "Cannot fetch blogs");
+
   }
 };
 
