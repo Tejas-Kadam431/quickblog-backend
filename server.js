@@ -27,9 +27,15 @@ app.use('/api/admin', adminRouter)
 app.use('/api/blog', blogRouter)
 app.use(errorHandler);
 app.get('/',(req,res)=> res.send("API is Working"))
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: "OK", timestamp: Date.now() });
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "OK",
+    service: "QuickBlog Backend API",
+    timestamp: new Date().toISOString(),
+  });
 });
+
 
 const PORT = process.env.PORT || 3000;
 
