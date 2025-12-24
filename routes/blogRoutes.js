@@ -3,6 +3,7 @@ import { addBlog } from '../controllers/blogController.js';
 import upload from '../middleware/multer.js';
 import auth from '../middleware/auth.js';
 import { searchBlogs } from "../controllers/blogController.js";
+import adminOnly from "../middleware/adminOnly.js";
 
 import {
   addBlog,
@@ -27,14 +28,16 @@ blogRouter.get("/search", searchBlogs);
 blogRouter.get("/published/all", getPublishedBlogs);
 blogRouter.get("/slug/:slug", getBlogBySlug);
 blogRouter.get("/search", searchBlogs);
+blogRouter.post("/add", auth, adminOnly, upload.single("image"), addBlog);
 
-blogRouter.get("/:id", getBlogById);
-blogRouter.put("/:id", auth, upload.single("image"), updateBlog);
+blogRouter.put("/:id", auth, adminOnly, upload.single("image"), updateBlog);
 
+blogRouter.delete("/:id", auth, adminOnly, deleteBlog);
 
-blogRouter.delete("/:id", auth, deleteBlog);
-blogRouter.patch("/publish/:id", auth, togglePublishBlog);
-blogRouter.get("/unpublished/all", auth, getUnpublishedBlogs);
+blogRouter.patch("/publish/:id", auth, adminOnly, togglePublishBlog);
+
+blogRouter.get("/unpublished/all", auth, adminOnly, getUnpublishedBlogs);
+
 
 
 
@@ -44,6 +47,5 @@ blogRouter.get("/unpublished/all", auth, getUnpublishedBlogs);
 
 const blogRouter = express.Router();
 
-blogRouter.post("/add", upload.single('image'), auth, addBlog)
 
 export default blogRouter;
