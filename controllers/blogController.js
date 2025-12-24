@@ -208,7 +208,12 @@ export const updateBlog = async (req, res) => {
       }
     }
 
-    if (title) blog.title = title;
+    // If title is updated, update slug safely
+if (title && title !== blog.title) {
+  blog.title = title;
+  blog.slug = await generateUniqueSlug(title);
+}
+
     if (subTitle !== undefined) blog.subTitle = subTitle;
     if (description) blog.description = description;
     if (category) blog.category = category;
