@@ -293,3 +293,48 @@ export const togglePublishBlog = async (req, res) => {
     return errorResponse(res, 500, "Failed to toggle publish status");
   }
 };
+/* ----------------------------------
+   Search Blogs (Published + Pagination)
+-----------------------------------*/
+export const searchBlogs = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!q) {
+      return errorResponse(res, 400, "Search query is required");
+    }
+
+    const regex = new RegExp(q, "i");
+
+    const filter = {
+      isPublished: true,
+      $or: [
+        { title: regex },
+        { description: regex },
+        { category: regex },
+      ],
+    };
+
+    const blogs = await Blog.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Blog.countDocuments(filter);
+
+    return successResponse(res, {
+      page,
+      totalPages: Math.ceil(total / limit),
+      count: blogs.length,
+      blogs,
+    }, "Search results fetched");
+  } catch (error) {
+    console.error("Search Blogs Error:", error);
+    return errorResponse(res, 500, "Search failed");
+  }
+};
+
